@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Werewolf Game</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .bg {
+            height: 100%; 
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative; /* Ensure relative positioning */
+        }
+        .bg-admin { background-image: url("LOBBY.png"); } /* Adjust path if necessary */
+        .bg-join { background-image: url("JOIN.png"); } /* Background for join screen */
+        .bg-game { background-color: #333; } /* Background for game screen */
+        .content {
+            color: white;
+            text-shadow: 2px 2px 4px #000000;
+        }
+        input {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+        }
+        button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+        .player-card {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 150px;
+            text-align: center;
+            display: inline-block;
+        }
+        .player-card img {
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Login Screen -->
+    <div class="bg bg-admin">
+        <div class="content">
+            <h2>Host Login</h2>
+            <input type="text" id="adminName" placeholder="Ilagay ang Pangalan">
+            <button onclick="loginAsAdmin()">Maglog In</button>
+            <div id="gameCodeDisplay" class="hidden">
+                <h3>Game Code: <span id="gameCode"></span></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Game Screen (hidden initially) -->
+    <div class="bg bg-join hidden" id="joinScreen">
+        <div class="content">
+            <h2>Sumali</h2>
+            <input type="text" id="joinCode" placeholder="Ilagay ang Code">
+            <button onclick="joinGame()">Sumali</button>
+        </div>
+    </div>
+
+    <!-- Game Screen (hidden initially) -->
+    <div class="bg bg-game hidden" id="gameScreen">
+        <div class="content">
+            <h2>Werewolf Game</h2>
+            <div id="playerCards"></div>
+            <div id="votingInterface">
+                <h3>Voting Interface</h3>
+                <!-- Add dynamic elements for voting -->
+            </div>
+            <div id="phaseIndicator">
+                <h3>Phase Indicator</h3>
+                <!-- Display current game phase (Day/Night) -->
+            </div>
+            <div id="inbox">
+                <h3>Inbox</h3>
+                <!-- Display private messages -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="backgroundMusic" loop>
+        <source src="C:\Users\logro\my-werewolf-game\BG MUSIC.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- JavaScript to handle game logic -->
+    <script>
+        let adminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
+        let gameCode = sessionStorage.getItem('gameCode') || "";
+        let players = JSON.parse(sessionStorage.getItem('players')) || [];
+
+        function loginAsAdmin() {
+            const adminName = document.getElementById('adminName').value.trim();
+
+            if (adminName) {
+                adminLoggedIn = true;
+                document.querySelector('.bg-admin').classList.add('hidden');
+                document.querySelector('.bg-join').classList.remove('hidden');
+                generateGameCode(); // Generate game code when admin logs in
+                setupGame(); // Initialize game setup when admin logs in
+
+                // Display game code to the host
+                document.getElementById('gameCode').textContent = gameCode;
+                document.getElementById('gameCodeDisplay').classList.remove('hidden');
+
+                // Automatically fill in the join code for the host
+                document.getElementById('joinCode').value = gameCode;
+
+                // Save admin login state and game code to sessionStorage
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                sessionStorage.setItem('gameCode', gameCode);
+            } else {
+                alert("Ilagay ang Pangalan.");
+            }
+        }
+
+        function generateGameCode() {
+            // Replace with your code generation logic
+            gameCode = generateRandomCode(); // Example function to generate a random code
+            console.log("Generated Game Code:", gameCode);
+        }
+
+        function joinGame() {
+            const enteredCode = document.getElementById('joinCode').value.trim();
+
+            if (enteredCode === gameCode) {
+                console.log("Sumasali:", enteredCode);
+                addPlayer(); // Add player to the game
+                if (players.length >= 5) {
+                    document.querySelector('.bg-join').classList.add('hidden');
+                    document.querySelector('.bg-game').classList.remove('hidden');
+                    document.getElementById('backgroundMusic').play(); // Play background music
+                } else {
+                    alert("Naghihintay pa sa ibang manlalaro. 5 manlalaro ang kailangan.");
+                }
+            } else {
+                alert("Invalid ang code.");
+            }
+        }
+
+        function addPlayer() {
+            // Example: Add player to the players array
+            const playerName = "Player" + (players.length + 1); // Replace with actual player name input if needed
+            players.push({ name: playerName, role: "", cardImage: "" });
+
+            // Save players array to sessionStorage
+            sessionStorage.setItem('players', JSON.stringify(players));
+        }
+
+        function setupGame() {
+            // Example: Assign roles to players
+            assignRoles(players);
+            // Example: Start day-night cycle
+            switchToNextPhase();
+            // Example: Display player cards with roles
+            displayPlayerCards();
+        }
+
+        // Function to assign roles randomly to players
+        function assignRoles(players) {
+            const roles = [
+                { name: "MAMAMAYAN", image: "BABAE.png" },
+                { name: "MAMAMAYAN", image: "LALAKI.png" },
+                { name: "MAHARLIKA", image: "MAHARLIKA.png" },
+                { name: "MAHARLIKA", image: "MAHARLIKA(2).png" },
+                { name: "MANANANGGAL", image: "MANANANGGAL.png" },
+                { name: "TIYANAK", image: "TIYANAK.png" },
+                { name: "SIYOKOY", image: "SIYOKOY.png" },
+                { name: "BABAYLAN", image: "BABAYLAN1.png" },
+                { name: "BABAYLAN", image: "BABAYLAN2.png" }
+                // Add more roles as needed
+            ];
+
+            shuffleArray(roles); // Shuffle roles
+
+            for (let i = 0; i < players.length; i++) {
+                const role = roles[i % roles.length]; // Assign roles in a loop
+                players[i].role = role.name;
+                players[i].cardImage = role.image;
+            }
+
+            // Save updated players array to sessionStorage
+            sessionStorage.setItem('players', JSON.stringify(players));
+        }
+
+        // Function to shuffle array (Fisher-Yates shuffle algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Function to generate a random 6-digit alphanumeric code
+        function generateRandomCode() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        // Example: Function to switch between day and night phases
+        let isDaytime = true; // Example initial phase
+
+        function switchToNextPhase() {
+            if (isDaytime) {
+                // Perform actions for night phase
+                console.log("Hating Gabi");
+            } else {
+                // Perform actions for day phase
+                console.log("Araw na");
+            }
+            isDaytime = !isDaytime; // Toggle between day and night
+        }
+
+        // Example: Function to display player cards
+        function displayPlayerCards() {
+            const playerCardsContainer = document.getElementById('playerCards');
+            playerCardsContainer.innerHTML = ''; // Clear existing player cards
+
+            players.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.classList.add('player-card');
+                playerCard.innerHTML = `
+                    <img src="${player.cardImage}" alt="${player.role}">
+                    <p>${player.name}</p>
+                    <p>${player.role}</p>
+                `;
+                playerCardsContainer.appendChild(playerCard);
+            });
+        }
+    </script>
+</body>
+</html>
