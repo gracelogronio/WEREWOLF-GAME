@@ -21,7 +21,7 @@
             position: relative; /* Ensure relative positioning */
         }
         .bg-admin { background-image: url("LOBBY.png"); } /* Adjust path if necessary */
-        .bg-join { background-image: url("SCARY 3.png"); } /* Background for join screen */
+        .bg-join { background-image: url("JOIN.png"); } /* Background for join screen */
         .bg-game { background-color: #333; } /* Background for game screen */
         .content {
             color: white;
@@ -72,8 +72,8 @@
     <div class="bg bg-admin hidden" id="adminScreen">
         <div class="content">
             <h2>Maglog In</h2>
-            <input type="text" id="adminName" placeholder="Enter Host Name">
-            <button onclick="loginAsAdmin()">Log In as Host</button>
+            <input type="text" id="adminName" placeholder="Ilagay ang Pangalan">
+            <button onclick="loginAsAdmin()">Maglog In</button>
             <div id="gameCodeDisplay" class="hidden">
                 <h3>Game Code: <span id="gameCode"></span></h3>
             </div>
@@ -128,8 +128,12 @@
 
             if (isHost) {
                 document.getElementById('adminScreen').classList.remove('hidden');
+                document.getElementById('joinScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.add('hidden');
             } else if (isJoin) {
+                document.getElementById('joinScreen').classList.add('hidden');
                 document.getElementById('joinScreen').classList.remove('hidden');
+                document.getElementById('gameScreen').classList.add('hidden');
             }
         });
 
@@ -145,6 +149,9 @@
                 // Display game code to the host
                 document.getElementById('gameCode').textContent = gameCode;
                 document.getElementById('gameCodeDisplay').classList.remove('hidden');
+
+                // Automatically fill in the join code for the host
+                document.getElementById('joinCode').value = gameCode;
 
                 // Update URL to include host action
                 history.pushState({}, '', '?host');
@@ -175,6 +182,9 @@
             // Replace with your code generation logic
             gameCode = generateRandomCode(); // Example function to generate a random code
             console.log("Generated Game Code:", gameCode);
+            // Display the generated game code
+            document.getElementById('gameCode').textContent = gameCode;
+            document.getElementById('gameCodeDisplay').classList.remove('hidden');
         }
 
         function addPlayer() {
