@@ -70,7 +70,7 @@
 </head>
 <body>
     <!-- Admin Login Screen -->
-    <div class="bg bg-admin">
+    <div class="bg bg-admin hidden" id="adminScreen">
         <div class="content">
             <h2>Host Login</h2>
             <input type="text" id="adminName" placeholder="Ilagay ang Pangalan">
@@ -81,7 +81,7 @@
         </div>
     </div>
 
-    <!-- Join Game Screen (hidden initially) -->
+    <!-- Join Game Screen -->
     <div class="bg bg-join hidden" id="joinScreen">
         <div class="content">
             <h2>Sumali</h2>
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Game Screen (hidden initially) -->
+    <!-- Game Screen -->
     <div class="bg bg-game hidden" id="gameScreen">
         <div class="content">
             <h2>Werewolf Game</h2>
@@ -118,17 +118,29 @@
 
     <!-- JavaScript to handle game logic -->
     <script>
-        let adminLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
-        let gameCode = sessionStorage.getItem('gameCode') || "";
-        let players = JSON.parse(sessionStorage.getItem('players')) || [];
+        let adminLoggedIn = false;
+        let gameCode = "";
+        let players = []; // Array to store player information
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isHost = urlParams.has('host');
+            const isJoin = urlParams.has('join');
+
+            if (isHost) {
+                document.getElementById('adminScreen').classList.remove('hidden');
+            } else if (isJoin) {
+                document.getElementById('joinScreen').classList.remove('hidden');
+            }
+        });
 
         function loginAsAdmin() {
             const adminName = document.getElementById('adminName').value.trim();
 
             if (adminName) {
                 adminLoggedIn = true;
-                document.querySelector('.bg-admin').classList.add('hidden');
-                document.querySelector('.bg-join').classList.remove('hidden');
+                document.getElementById('adminScreen').classList.add('hidden');
+                document.getElementById('joinScreen').classList.remove('hidden');
                 generateGameCode(); // Generate game code when admin logs in
                 setupGame(); // Initialize game setup when admin logs in
 
@@ -138,10 +150,6 @@
 
                 // Automatically fill in the join code for the host
                 document.getElementById('joinCode').value = gameCode;
-
-                // Save admin login state and game code to sessionStorage
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                sessionStorage.setItem('gameCode', gameCode);
             } else {
                 alert("Ilagay ang Pangalan.");
             }
@@ -160,8 +168,8 @@
                 console.log("Sumasali:", enteredCode);
                 addPlayer(); // Add player to the game
                 if (players.length >= 5) {
-                    document.querySelector('.bg-join').classList.add('hidden');
-                    document.querySelector('.bg-game').classList.remove('hidden');
+                    document.getElementById('joinScreen').classList.add('hidden');
+                    document.getElementById('gameScreen').classList.remove('hidden');
                     document.getElementById('backgroundMusic').play(); // Play background music
                 } else {
                     alert("Naghihintay pa sa ibang manlalaro. 5 manlalaro ang kailangan.");
@@ -175,9 +183,6 @@
             // Example: Add player to the players array
             const playerName = "Player" + (players.length + 1); // Replace with actual player name input if needed
             players.push({ name: playerName, role: "", cardImage: "" });
-
-            // Save players array to sessionStorage
-            sessionStorage.setItem('players', JSON.stringify(players));
         }
 
         function setupGame() {
@@ -211,9 +216,6 @@
                 players[i].role = role.name;
                 players[i].cardImage = role.image;
             }
-
-            // Save updated players array to sessionStorage
-            sessionStorage.setItem('players', JSON.stringify(players));
         }
 
         // Function to shuffle array (Fisher-Yates shuffle algorithm)
@@ -226,32 +228,19 @@
 
         // Function to generate a random 6-digit alphanumeric code
         function generateRandomCode() {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
             for (let i = 0; i < 6; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
+                const randomIndex = Math.floor(Math.random() * characters.length);
+                code += characters[randomIndex];
             }
-            return result;
+            return code;
         }
 
-        // Example: Function to switch between day and night phases
-        let isDaytime = true; // Example initial phase
-
-        function switchToNextPhase() {
-            if (isDaytime) {
-                // Perform actions for night phase
-                console.log("Hating Gabi");
-            } else {
-                // Perform actions for day phase
-                console.log("Araw na");
-            }
-            isDaytime = !isDaytime; // Toggle between day and night
-        }
-
-        // Example: Function to display player cards
+        // Function to display player cards with roles
         function displayPlayerCards() {
             const playerCardsContainer = document.getElementById('playerCards');
-            playerCardsContainer.innerHTML = ''; // Clear existing player cards
+            playerCardsContainer.innerHTML = ''; // Clear previous cards
 
             players.forEach(player => {
                 const playerCard = document.createElement('div');
@@ -263,6 +252,12 @@
                 `;
                 playerCardsContainer.appendChild(playerCard);
             });
+        }
+
+        // Function to switch to the next game phase (day/night cycle)
+        function switchToNextPhase() {
+            // Add your game phase logic here
+            console.log("Switching to the next phase...");
         }
     </script>
 </body>
