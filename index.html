@@ -130,64 +130,63 @@
         let gameCode = "";
         let players = []; // Array to store player information
         let messages = []; // Array to store messages
-
+        
         document.addEventListener("DOMContentLoaded", function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const isHost = urlParams.has('host');
-            const isJoin = urlParams.has('join');
-
-            if (isHost) {
-                showAdminScreen();
-            } else if (isJoin) {
+        
+            // Check if game code exists in URL (implies joining)
+            const gameCodeFromURL = urlParams.get('code');
+            if (gameCodeFromURL) {
                 showJoinScreen();
+                document.getElementById('joinCode').value = gameCodeFromURL;
             } else {
-                showLobbyScreen(); // Default to lobby screen if no parameters
+                showLobbyScreen();
             }
         });
-
+        
         function showAdminScreen() {
             document.getElementById('adminScreen').classList.remove('hidden');
             document.getElementById('joinScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('hidden');
         }
-
+        
         function showJoinScreen() {
             document.getElementById('joinScreen').classList.remove('hidden');
             document.getElementById('adminScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('hidden');
         }
-
+        
         function showLobbyScreen() {
             document.getElementById('adminScreen').classList.add('hidden');
             document.getElementById('joinScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('hidden');
         }
-
+        
         function loginAsAdmin() {
             const adminName = document.getElementById('adminName').value.trim();
-
+        
             if (adminName) {
                 adminLoggedIn = true;
                 showJoinScreen();
                 generateGameCode(); // Generate game code when admin logs in
-
+        
                 // Display game code to the host
                 document.getElementById('gameCode').textContent = gameCode;
                 document.getElementById('gameCodeDisplay').classList.remove('hidden');
-
+        
                 // Automatically fill in the join code for the host
                 document.getElementById('joinCode').value = gameCode;
-
+        
                 // Update URL to include host action
-                history.pushState({}, '', '?host');
+                history.pushState({}, '', `?code=${gameCode}`);
             } else {
                 alert("Ilagay ang pangalan.");
             }
         }
-
+        
         function joinGame() {
             const enteredCode = document.getElementById('joinCode').value.trim();
-
+        
             if (enteredCode === gameCode) {
                 console.log("Sumasali:", enteredCode);
                 addPlayer(); // Add player to the game
@@ -201,13 +200,25 @@
                 alert("Invalid ang game code.");
             }
         }
-
+        
         function showGameScreen() {
             document.getElementById('gameScreen').classList.remove('hidden');
             document.getElementById('adminScreen').classList.add('hidden');
             document.getElementById('joinScreen').classList.add('hidden');
+        
+            // Initialize messaging UI
+            displayMessages();
+            document.getElementById('messageForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const messageInput = document.getElementById('messageInput');
+                const message = messageInput.value.trim();
+                if (message) {
+                    sendMessage(message);
+                    messageInput.value = ''; // Clear input after sending message
+                }
+            });
         }
-
+        
         function generateGameCode() {
             // Replace with your code generation logic
             gameCode = generateRandomCode(); // Example function to generate a random code
@@ -216,7 +227,7 @@
             document.getElementById('gameCode').textContent = gameCode;
             document.getElementById('gameCodeDisplay').classList.remove('hidden');
         }
-
+        
         function addPlayer() {
             // Example: Add player to the players array
             const playerName = "Player" + (players.length + 1); // Replace with actual player name input if needed
@@ -224,7 +235,7 @@
             assignRoles(players); // Assign roles once player joins
             displayPlayerCards(); // Display player cards after joining
         }
-
+        
         // Function to generate a random 6-digit alphanumeric code
         function generateRandomCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -235,7 +246,7 @@
             }
             return code;
         }
-
+        
         // Function to assign roles randomly to players
         function assignRoles(players) {
             const roles = [
@@ -250,16 +261,16 @@
                 { name: "SIYOKOY", image: "SIYOKOY.png" },
                 // Add more roles as needed
             ];
-
+        
             shuffleArray(roles); // Shuffle roles
-
+        
             for (let i = 0; i < players.length; i++) {
                 const role = roles[i % roles.length]; // Assign roles in a loop
                 players[i].role = role.name;
                 players[i].cardImage = role.image;
             }
         }
-
+        
         // Function to shuffle array (Fisher-Yates shuffle algorithm)
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -267,12 +278,12 @@
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-
+        
         // Function to display player cards with roles
         function displayPlayerCards() {
             const playerCardsContainer = document.getElementById('playerCards');
             playerCardsContainer.innerHTML = ''; // Clear previous cards
-
+        
             players.forEach(player => {
                 const playerCard = document.createElement('div');
                 playerCard.classList.add('player-card');
@@ -284,29 +295,28 @@
                 playerCardsContainer.appendChild(playerCard);
             });
         }
-
-        // Function to handle sending a message
-        function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            if (message) {
-                messages.push({ sender: "Player", content: message });
-                displayMessages();
-                messageInput.value = '';
-            }
+        
+        // Function to send message
+        function sendMessage(message) {
+            const playerName = "You"; // For simplicity, assume the player is sending the message
+            const messageObj = { sender: playerName, content: message };
+            messages.push(messageObj);
+            displayMessages();
         }
-
+        
         // Function to display messages
         function displayMessages() {
-            const messageContainer = document.getElementById('messageContainer');
-            messageContainer.innerHTML = '';
-
-            messages.forEach(msg => {
+            const inboxElement = document.getElementById('inbox');
+            inboxElement.innerHTML = '<h3>Inbox</h3>'; // Clear previous messages
+        
+            messages.forEach(message => {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message');
-                messageElement.textContent = `${msg.sender}: ${msg.content}`;
-                messageContainer.appendChild(messageElement);
-            });
+                messageElement.innerHTML = `
+                    <strong>${message.sender}:</strong> ${message.content}
+                `;
+                inboxElement.appendChild(messageElement);
+                });
         }
     </script>
 </body>
