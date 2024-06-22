@@ -73,8 +73,8 @@
     <div class="bg bg-admin hidden" id="adminScreen">
         <div class="content">
             <h2>Host Login</h2>
-            <input type="text" id="adminName" placeholder="Ilagay ang Pangalan">
-            <button onclick="loginAsAdmin()">Maglog In</button>
+            <input type="text" id="adminName" placeholder="Enter Host Name">
+            <button onclick="loginAsAdmin()">Log In as Host</button>
             <div id="gameCodeDisplay" class="hidden">
                 <h3>Game Code: <span id="gameCode"></span></h3>
             </div>
@@ -84,9 +84,9 @@
     <!-- Join Game Screen -->
     <div class="bg bg-join hidden" id="joinScreen">
         <div class="content">
-            <h2>Sumali</h2>
-            <input type="text" id="joinCode" placeholder="Ilagay ang Code">
-            <button onclick="joinGame()">Sumali</button>
+            <h2>Join Game</h2>
+            <input type="text" id="joinCode" placeholder="Enter Game Code">
+            <button onclick="joinGame()">Join Game</button>
         </div>
     </div>
 
@@ -112,7 +112,7 @@
 
     <!-- Audio Element -->
     <audio id="backgroundMusic" loop>
-        <source src="C:\Users\logro\my-werewolf-game\BG MUSIC.mp3" type="audio/mpeg">
+        <source src="BG MUSIC.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
@@ -142,16 +142,33 @@
                 document.getElementById('adminScreen').classList.add('hidden');
                 document.getElementById('joinScreen').classList.remove('hidden');
                 generateGameCode(); // Generate game code when admin logs in
-                setupGame(); // Initialize game setup when admin logs in
 
                 // Display game code to the host
                 document.getElementById('gameCode').textContent = gameCode;
                 document.getElementById('gameCodeDisplay').classList.remove('hidden');
 
-                // Automatically fill in the join code for the host
-                document.getElementById('joinCode').value = gameCode;
+                // Update URL to include host action
+                history.pushState({}, '', '?host');
             } else {
-                alert("Ilagay ang Pangalan.");
+                alert("Enter Host Name.");
+            }
+        }
+
+        function joinGame() {
+            const enteredCode = document.getElementById('joinCode').value.trim();
+
+            if (enteredCode === gameCode) {
+                console.log("Joining Game:", enteredCode);
+                addPlayer(); // Add player to the game
+                if (players.length >= 5) {
+                    document.getElementById('joinScreen').classList.add('hidden');
+                    document.getElementById('gameScreen').classList.remove('hidden');
+                    document.getElementById('backgroundMusic').play(); // Play background music
+                } else {
+                    alert("Waiting for more players. Need at least 5 players.");
+                }
+            } else {
+                alert("Invalid game code.");
             }
         }
 
@@ -161,70 +178,10 @@
             console.log("Generated Game Code:", gameCode);
         }
 
-        function joinGame() {
-            const enteredCode = document.getElementById('joinCode').value.trim();
-
-            if (enteredCode === gameCode) {
-                console.log("Sumasali:", enteredCode);
-                addPlayer(); // Add player to the game
-                if (players.length >= 5) {
-                    document.getElementById('joinScreen').classList.add('hidden');
-                    document.getElementById('gameScreen').classList.remove('hidden');
-                    document.getElementById('backgroundMusic').play(); // Play background music
-                } else {
-                    alert("Naghihintay pa sa ibang manlalaro. 5 manlalaro ang kailangan.");
-                }
-            } else {
-                condole.log("Invalid ang code.", enteredCode); //Debugging Log
-                alert("Invalid ang Code.");
-            }
-        }
-
         function addPlayer() {
             // Example: Add player to the players array
             const playerName = "Player" + (players.length + 1); // Replace with actual player name input if needed
             players.push({ name: playerName, role: "", cardImage: "" });
-        }
-
-        function setupGame() {
-            // Example: Assign roles to players
-            assignRoles(players);
-            // Example: Start day-night cycle
-            switchToNextPhase();
-            // Example: Display player cards with roles
-            displayPlayerCards();
-        }
-
-        // Function to assign roles randomly to players
-        function assignRoles(players) {
-            const roles = [
-                { name: "MAMAMAYAN", image: "BABAE.png" },
-                { name: "MAMAMAYAN", image: "LALAKI.png" },
-                { name: "MAHARLIKA", image: "MAHARLIKA.png" },
-                { name: "MAHARLIKA", image: "MAHARLIKA(2).png" },
-                { name: "MANANANGGAL", image: "MANANANGGAL.png" },
-                { name: "TIYANAK", image: "TIYANAK.png" },
-                { name: "SIYOKOY", image: "SIYOKOY.png" },
-                { name: "BABAYLAN", image: "BABAYLAN1.png" },
-                { name: "BABAYLAN", image: "BABAYLAN2.png" }
-                // Add more roles as needed
-            ];
-
-            shuffleArray(roles); // Shuffle roles
-
-            for (let i = 0; i < players.length; i++) {
-                const role = roles[i % roles.length]; // Assign roles in a loop
-                players[i].role = role.name;
-                players[i].cardImage = role.image;
-            }
-        }
-
-        // Function to shuffle array (Fisher-Yates shuffle algorithm)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
         }
 
         // Function to generate a random 6-digit alphanumeric code
@@ -236,29 +193,6 @@
                 code += characters[randomIndex];
             }
             return code;
-        }
-
-        // Function to display player cards with roles
-        function displayPlayerCards() {
-            const playerCardsContainer = document.getElementById('playerCards');
-            playerCardsContainer.innerHTML = ''; // Clear previous cards
-
-            players.forEach(player => {
-                const playerCard = document.createElement('div');
-                playerCard.classList.add('player-card');
-                playerCard.innerHTML = `
-                    <img src="${player.cardImage}" alt="${player.role}">
-                    <p>${player.name}</p>
-                    <p>${player.role}</p>
-                `;
-                playerCardsContainer.appendChild(playerCard);
-            });
-        }
-
-        // Function to switch to the next game phase (day/night cycle)
-        function switchToNextPhase() {
-            // Add your game phase logic here
-            console.log("Switching to the next phase...");
         }
     </script>
 </body>
