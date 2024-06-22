@@ -65,6 +65,13 @@
             height: auto;
             margin-bottom: 10px;
         }
+        .message {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -83,9 +90,9 @@
     <!-- Join Game Screen -->
     <div class="bg bg-join hidden" id="joinScreen">
         <div class="content">
-            <h2>Join Game</h2>
-            <input type="text" id="joinCode" placeholder="Enter Game Code">
-            <button onclick="joinGame()">Join Game</button>
+            <h2>Sumali</h2>
+            <input type="text" id="joinCode" placeholder="Ilagay ang Game Code">
+            <button onclick="joinGame()">Sumali</button>
         </div>
     </div>
 
@@ -104,7 +111,9 @@
             </div>
             <div id="inbox">
                 <h3>Inbox</h3>
-                <!-- Display private messages -->
+                <div id="messageContainer"></div>
+                <input type="text" id="messageInput" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
             </div>
         </div>
     </div>
@@ -120,6 +129,7 @@
         let adminLoggedIn = false;
         let gameCode = "";
         let players = []; // Array to store player information
+        let messages = []; // Array to store messages
 
         document.addEventListener("DOMContentLoaded", function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -127,23 +137,38 @@
             const isJoin = urlParams.has('join');
 
             if (isHost) {
-                document.getElementById('adminScreen').classList.remove('hidden');
-                document.getElementById('joinScreen').classList.add('hidden');
-                document.getElementById('gameScreen').classList.add('hidden');
+                showAdminScreen();
             } else if (isJoin) {
-                document.getElementById('joinScreen').classList.add('hidden');
-                document.getElementById('joinScreen').classList.remove('hidden');
-                document.getElementById('gameScreen').classList.add('hidden');
+                showJoinScreen();
+            } else {
+                showLobbyScreen(); // Default to lobby screen if no parameters
             }
         });
+
+        function showAdminScreen() {
+            document.getElementById('adminScreen').classList.remove('hidden');
+            document.getElementById('joinScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+        }
+
+        function showJoinScreen() {
+            document.getElementById('joinScreen').classList.remove('hidden');
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+        }
+
+        function showLobbyScreen() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('joinScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+        }
 
         function loginAsAdmin() {
             const adminName = document.getElementById('adminName').value.trim();
 
             if (adminName) {
                 adminLoggedIn = true;
-                document.getElementById('adminScreen').classList.add('hidden');
-                document.getElementById('joinScreen').classList.remove('hidden');
+                showJoinScreen();
                 generateGameCode(); // Generate game code when admin logs in
 
                 // Display game code to the host
@@ -167,8 +192,7 @@
                 console.log("Sumasali:", enteredCode);
                 addPlayer(); // Add player to the game
                 if (players.length >= 5) {
-                    document.getElementById('joinScreen').classList.add('hidden');
-                    document.getElementById('gameScreen').classList.remove('hidden');
+                    showGameScreen();
                     document.getElementById('backgroundMusic').play(); // Play background music
                 } else {
                     alert("Naghahantay pa sa ibang manlalaro. 5 manlalaro ang kailangan.");
@@ -176,6 +200,12 @@
             } else {
                 alert("Invalid ang game code.");
             }
+        }
+
+        function showGameScreen() {
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('joinScreen').classList.add('hidden');
         }
 
         function generateGameCode() {
@@ -191,6 +221,8 @@
             // Example: Add player to the players array
             const playerName = "Player" + (players.length + 1); // Replace with actual player name input if needed
             players.push({ name: playerName, role: "", cardImage: "" });
+            assignRoles(players); // Assign roles once player joins
+            displayPlayerCards(); // Display player cards after joining
         }
 
         // Function to generate a random 6-digit alphanumeric code
@@ -250,6 +282,30 @@
                     <p>${player.role}</p>
                 `;
                 playerCardsContainer.appendChild(playerCard);
+            });
+        }
+
+        // Function to handle sending a message
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message) {
+                messages.push({ sender: "Player", content: message });
+                displayMessages();
+                messageInput.value = '';
+            }
+        }
+
+        // Function to display messages
+        function displayMessages() {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = '';
+
+            messages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.textContent = `${msg.sender}: ${msg.content}`;
+                messageContainer.appendChild(messageElement);
             });
         }
     </script>
