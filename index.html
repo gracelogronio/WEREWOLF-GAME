@@ -5,8 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <!-- Your HTML content here -->
+<body><!-- Admin Login Screen -->
+    <div class="bg bg-admin hidden" id="adminScreen">
+        <div class="content">
+            <h2>Maglog In</h2>
+            <input type="text" id="adminName" placeholder="Ilagay ang Pangalan">
+            <button onclick="loginAsAdmin()">Maglog In</button>
+            <div id="gameCodeDisplay" class="hidden">
+                <h3>Game Code: <span id="gameCode"></span></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Game Screen -->
+    <div class="bg bg-join hidden" id="joinScreen">
+        <div class="content">
+            <h2>Sumali</h2>
+            <input type="text" id="joinCode" placeholder="Ilagay ang Game Code">
+            <button onclick="joinGame()">Sumali</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="bg bg-game hidden" id="gameScreen">
+        <div class="content">
+            <h2>Werewolf Game</h2>
+            <div id="playerCards"></div>
+            <div id="votingInterface">
+                <h3>Voting Interface</h3>
+                <!-- Add dynamic elements for voting -->
+            </div>
+            <div id="phaseIndicator">
+                <h3>Phase Indicator</h3>
+                <!-- Display current game phase (Day/Night) -->
+            </div>
+            <div id="inbox">
+                <h3>Inbox</h3>
+                <div id="messageContainer"></div>
+                <input type="text" id="messageInput" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="backgroundMusic" loop>
+        <source src="BG MUSIC.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
     <script src="script.js"></script>
 </body>
 </html>
