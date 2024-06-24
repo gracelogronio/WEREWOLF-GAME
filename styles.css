@@ -1,0 +1,78 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.bg {
+    height: 100%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative; /* Ensure relative positioning */
+}
+
+.bg-admin { background-image: url("LOBBY.png"); } /* Adjust path if necessary */
+.bg-join { background-image: url("JOIN.png"); } /* Background for join screen */
+.bg-game { background-color: #333; } /* Background for game screen */
+
+.content {
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+}
+
+input {
+    margin: 10px;
+    padding: 10px;
+    font-size: 16px;
+    width: 80%;
+    max-width: 300px;
+}
+
+button {
+    margin: 10px;
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.hidden {
+    display: none;
+}
+
+.player-card {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    width: 150px;
+    text-align: center;
+    display: inline-block;
+}
+
+.player-card img {
+    max-width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.message {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin: 5px;
+    text-align: left;
+}
