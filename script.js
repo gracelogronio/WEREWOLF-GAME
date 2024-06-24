@@ -190,5 +190,3 @@
                 inboxElement.appendChild(messageElement);
                 });
         }
-</body>
-</html>
